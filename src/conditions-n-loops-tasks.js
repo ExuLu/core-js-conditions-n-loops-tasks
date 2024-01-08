@@ -504,7 +504,7 @@ function shuffleChar(str, iterations) {
  * @returns {number} The nearest larger number, or original number if none exists.
  */
 function getNearestBigger(number) {
-  const array = Array.from(`${number}`);
+  const array = Array.from(`${number}`).map((item) => Number(item));
 
   if (array.length < 2) return number;
 
@@ -513,28 +513,27 @@ function getNearestBigger(number) {
     return biggerNumber;
   }
 
-  const min = array.reduce((acc, item) => (acc < item ? acc : item));
-  const lastNonMin = array.reduce((acc, item) => {
-    if (item === min) {
-      return acc;
-    }
-    return item;
-  }, 0);
-  const indexOfLastNonMin = array.lastIndexOf(lastNonMin);
-  for (let i = indexOfLastNonMin; i >= 0; i -= 1) {
-    if (array[i] < lastNonMin) {
-      let newArray = [...array.slice(0, i), lastNonMin];
-      const rightPart = [
-        ...array.slice(i, indexOfLastNonMin),
-        ...array.slice(indexOfLastNonMin + 1),
-      ].sort((a, b) => a - b);
-      newArray = [...newArray, ...rightPart];
-      const newNumber = Number(newArray.join(''));
-      return newNumber;
+  const biggerNumbers = [];
+  let min = 0;
+
+  for (let i = array.length - 1; i > 0; i -= 1) {
+    const curNumber = array[i];
+    for (let j = i - 1; j >= 0; j -= 1) {
+      if (biggerNumbers.length > 0)
+        min = biggerNumbers.reduce((acc, cur) => (acc < cur ? acc : cur));
+      const prevNumber = array[j];
+      if (curNumber > prevNumber) {
+        const leftPart = array.filter((_, index) => index < j);
+        const rightPart = array
+          .filter((_, index) => index >= j && index !== i)
+          .sort((a, b) => a - b);
+        const newNum = Number([...leftPart, curNumber, ...rightPart].join(''));
+        if (!min || newNum < min) biggerNumbers.push(newNum);
+      }
     }
   }
 
-  return number;
+  return min;
 }
 
 module.exports = {
